@@ -34,35 +34,3 @@ pub struct Envelope {
     pub hash: u64,
     pub nonce: Vec<u8>,
 }
-
-#[derive(Debug, Serialize)]
-pub struct RegistrationData {
-    pub hash: u64,
-    pub key: Vec<u8>,
-}
-
-#[derive(Serialize, Debug, Default)]
-pub struct RoutingInfo {
-    pub customer_email: Option<String>,
-    pub authorization_bin: Option<String>,
-    pub authorization_par: Option<String>,
-}
-
-// #[derive(Deserialize, Debug)]
-// pub struct Receiver {
-//     pub address: String,
-//     pub org_id: String,
-//     pub version: String,
-// }
-
-#[derive(Deserialize)]
-pub struct Receiver {
-    pub id: String,
-    pub org_id: String,
-    pub handle: String,
-    pub handle_type: String,
-    pub name: String,
-    pub address: String,
-    pub created: i64,
-    pub decommissioned: Option<i64>,
-}

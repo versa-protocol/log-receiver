@@ -9,7 +9,7 @@ pub struct CheckoutRequest {
 
 #[derive(Deserialize)]
 pub struct Key {
-    pub transaction_hash: u64,
+    pub transaction_hash: String,
     pub decryption_key: Vec<u8>,
 }
 
