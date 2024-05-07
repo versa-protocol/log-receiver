@@ -54,8 +54,12 @@ pub async fn checkout_key(
     let payload_json = serde_json::to_string(&payload).unwrap();
 
     let client = reqwest::Client::new();
+    info!(
+        "Sending checkout request to: {}",
+        format!("{}/http/checkout", registry_url)
+    );
     let response_result = client
-        .post(format!("{registry_url}/http/checkout"))
+        .post(format!("{}/http/checkout", registry_url))
         .header("Accept", "application/json")
         .header("Authorization", credential)
         .header("Content-Type", "application/json")
