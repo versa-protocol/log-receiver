@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-async-stripe = { version = "0.37.0", features = ["runtime-tokio-hyper"] }
 axum = "0.7.5"
 tokio = { version = "1.37", features = ["full"] }
 dotenv = "0.15.0"
