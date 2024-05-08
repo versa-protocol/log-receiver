@@ -1,13 +1,14 @@
 use crate::protocol::ReceiverPayload;
 
 pub async fn target(
-    // headers: HeaderMap,
     axum::extract::Json(body): axum::extract::Json<ReceiverPayload>,
 ) -> Result<http::StatusCode, (http::StatusCode, String)> {
     let ReceiverPayload {
         sender_client_id,
         envelope,
     } = body;
+
+    info!("Received envelope from sender={}", sender_client_id);
 
     let receiver_client_id = std::env::var("CLIENT_ID").unwrap_or_default();
     let receiver_client_secret = std::env::var("CLIENT_SECRET").unwrap_or_default();
@@ -22,7 +23,7 @@ pub async fn target(
                 )
             })?;
 
-    info!("Received envelope from sender: {:?}", checkout.seller);
+    info!("Received keys for sender: {:?}", checkout.seller);
     let data = crate::encryption::decrypt_envelope::<crate::model::SenderReceiptHeader>(
         &envelope,
         &checkout.transaction.decryption_key,
