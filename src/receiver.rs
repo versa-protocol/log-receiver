@@ -29,7 +29,7 @@ pub async fn target(
     info!("Received keys for sender: {:?}", checkout.seller);
     let data = crate::encryption::decrypt_envelope::<crate::model::SenderReceiptHeader>(
         &envelope,
-        &checkout.transaction.decryption_key,
+        &checkout.transaction.encryption_key,
     );
 
     info!(

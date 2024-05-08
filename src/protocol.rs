@@ -10,7 +10,7 @@ pub struct CheckoutRequest {
 #[derive(Deserialize)]
 pub struct Transaction {
     pub transaction_hash: String,
-    pub decryption_key: Vec<u8>,
+    pub encryption_key: Vec<u8>,
 }
 
 #[derive(Debug, Deserialize)]
