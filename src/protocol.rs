@@ -69,10 +69,14 @@ pub async fn checkout_key(
 
     let res = match response_result {
         Ok(res) => res,
-        Err(_) => return Err(()),
+        Err(e) => {
+            info!("Error placing request: {:?}", e);
+            return Err(());
+        }
     };
 
     if res.status().is_success() {
+        info!("Successfully received data from registry");
         let data: Checkout = match res.json().await {
             Ok(val) => val,
             Err(e) => {
@@ -82,6 +86,10 @@ pub async fn checkout_key(
             }
         };
         return Ok(data);
+    } else {
+        let status = res.status();
+        let text = res.text().await.unwrap_or_default();
+        info!("Received an error from the registry: {} {}", status, text);
     }
 
     return Err(());
