@@ -1,3 +1,5 @@
+use serde_json::Value;
+
 use crate::protocol::ReceiverPayload;
 
 pub async fn target(
@@ -26,11 +28,8 @@ pub async fn target(
         )
     })?;
 
-    info!("Received keys for sender: {:?}", checkout.seller);
-    let data = crate::encryption::decrypt_envelope::<crate::model::SenderReceiptHeader>(
-        &envelope,
-        &checkout.transaction.encryption_key,
-    );
+    info!("Received keys for sender: {:?}", checkout.sender);
+    let data = crate::encryption::decrypt_envelope::<Value>(&envelope, &checkout.key);
 
     info!(
         "DATA RECEIVED FROM SENDER_CLIENT_ID={}: {:?}",

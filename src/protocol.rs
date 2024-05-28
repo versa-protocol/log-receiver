@@ -4,12 +4,12 @@ use crate::model::Envelope;
 
 #[derive(Serialize)]
 pub struct CheckoutRequest {
-    pub transaction_hash: String,
+    pub receipt_hash: String,
 }
 
 #[derive(Deserialize)]
 pub struct Transaction {
-    pub transaction_hash: String,
+    pub receipt_hash: String,
     pub encryption_key: Vec<u8>,
 }
 
@@ -31,8 +31,8 @@ pub struct Org {
 
 #[derive(Deserialize)]
 pub struct Checkout {
-    pub transaction: Transaction,
-    pub seller: Option<Org>,
+    pub key: Vec<u8>,
+    pub sender: Option<Org>,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -44,12 +44,12 @@ pub struct ReceiverPayload {
 pub async fn checkout_key(
     client_id: &str,
     client_secret: &str,
-    transaction_hash: String,
+    receipt_hash: String,
 ) -> Result<Checkout, ()> {
     let registry_url = std::env::var("REGISTRY_URL").unwrap_or_default();
     let credential = format!("{}:{}", client_id, client_secret);
 
-    let payload = CheckoutRequest { transaction_hash };
+    let payload = CheckoutRequest { receipt_hash };
 
     let payload_json = serde_json::to_string(&payload).unwrap();
 
