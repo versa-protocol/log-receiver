@@ -30,8 +30,15 @@ pub struct Org {
 }
 
 #[derive(Deserialize)]
+pub struct ReceiptRecord {
+    pub schema_version: String,
+    pub receipt_hash: String,
+    pub encryption_key: Vec<u8>,
+}
+
+#[derive(Deserialize)]
 pub struct Checkout {
-    pub key: Vec<u8>,
+    pub receipt: ReceiptRecord,
     pub sender: Option<Org>,
 }
 
