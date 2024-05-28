@@ -34,7 +34,8 @@ pub async fn target(
 
     info!(
         "DATA RECEIVED FROM SENDER_CLIENT_ID={}: {:?}",
-        sender_client_id, data
+        sender_client_id,
+        serde_json::to_string(&data).unwrap()
     );
 
     Ok(http::StatusCode::ACCEPTED)
