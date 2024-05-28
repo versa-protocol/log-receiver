@@ -47,7 +47,7 @@ pub async fn checkout_key(
     receipt_hash: String,
 ) -> Result<Checkout, ()> {
     let registry_url = std::env::var("REGISTRY_URL").unwrap_or_default();
-    let credential = format!("{}:{}", client_id, client_secret);
+    let credential = format!("Basic {}:{}", client_id, client_secret);
 
     let payload = CheckoutRequest { receipt_hash };
 
