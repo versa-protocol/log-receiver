@@ -1,10 +1,57 @@
+use hmac::Mac;
+use http::HeaderMap;
 use serde_json::Value;
 
 use crate::protocol::ReceiverPayload;
 
+async fn verify_with_secret(
+    body: axum::body::Body,
+    secret: String,
+    token: &str,
+) -> (bool, hyper::body::Bytes) {
+    let mut mac = hmac::Hmac::<sha1::Sha1>::new_from_slice(&secret.as_bytes()).unwrap();
+    let body_bytes = axum::body::to_bytes(body, 512_000_000).await.unwrap();
+    mac.update(body_bytes.as_ref());
+    let code_bytes = mac.finalize().into_bytes();
+    let hexdigest = hex::encode(&code_bytes.to_vec());
+    (hexdigest == token, body_bytes)
+}
+
 pub async fn target(
-    axum::extract::Json(body): axum::extract::Json<ReceiverPayload>,
+    headers: HeaderMap,
+    raw_body: axum::body::Body,
 ) -> Result<http::StatusCode, (http::StatusCode, String)> {
+    let receiver_secret = std::env::var("RECEIVER_SECRET").expect("RECEIVER_SECRET must be set");
+
+    let Some(request_signature) = headers.get("X-Request-Signature") else {
+        return Err((
+            http::StatusCode::BAD_REQUEST,
+            "Missing X-Request-Signature header".to_string(),
+        ));
+    };
+    let Ok(request_token) = request_signature.to_str() else {
+        return Err((
+            http::StatusCode::BAD_REQUEST,
+            "Malformed X-Request-Signature header".to_string(),
+        ));
+    };
+    let (verified, body_bytes) = verify_with_secret(raw_body, receiver_secret, request_token).await;
+    if !verified {
+        return Err((
+            http::StatusCode::UNAUTHORIZED,
+            "Failed to verify request signature".to_string(),
+        ));
+    }
+    let body: ReceiverPayload = match serde_json::from_slice(&body_bytes) {
+        Ok(val) => val,
+        Err(e) => {
+            return Err((
+                http::StatusCode::BAD_REQUEST,
+                format!("Failed to parse body: {}", e),
+            ));
+        }
+    };
+
     let ReceiverPayload {
         sender_client_id,
         envelope,
