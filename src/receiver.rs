@@ -42,6 +42,7 @@ pub async fn target(
             "Failed to verify request signature".to_string(),
         ));
     }
+    info!("Successfully verified hmac request signature");
     let body: ReceiverPayload = match serde_json::from_slice(&body_bytes) {
         Ok(val) => val,
         Err(e) => {
