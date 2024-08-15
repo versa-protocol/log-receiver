@@ -4,7 +4,7 @@ use crate::model::Envelope;
 
 #[derive(Serialize)]
 pub struct CheckoutRequest {
-    pub receipt_hash: String,
+    pub receipt_id: String,
 }
 
 #[derive(Deserialize)]
@@ -45,18 +45,19 @@ pub struct Checkout {
 #[derive(Deserialize, Serialize)]
 pub struct ReceiverPayload {
     pub sender_client_id: String,
+    pub receipt_id: String,
     pub envelope: Envelope,
 }
 
 pub async fn checkout_key(
     client_id: &str,
     client_secret: &str,
-    receipt_hash: String,
+    receipt_id: String,
 ) -> Result<Checkout, ()> {
     let registry_url = std::env::var("REGISTRY_URL").unwrap_or_default();
     let credential = format!("Basic {}:{}", client_id, client_secret);
 
-    let payload = CheckoutRequest { receipt_hash };
+    let payload = CheckoutRequest { receipt_id };
 
     let payload_json = serde_json::to_string(&payload).unwrap();
 
