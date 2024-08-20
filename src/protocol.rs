@@ -64,10 +64,10 @@ pub async fn checkout_key(
     let client = reqwest::Client::new();
     info!(
         "Sending checkout request to: {}",
-        format!("{}/http/checkout", registry_url)
+        format!("{}/checkout", registry_url)
     );
     let response_result = client
-        .post(format!("{}/http/checkout", registry_url))
+        .post(format!("{}/checkout", registry_url))
         .header("Accept", "application/json")
         .header("Authorization", credential)
         .header("Content-Type", "application/json")
