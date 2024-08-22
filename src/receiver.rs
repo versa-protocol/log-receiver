@@ -75,8 +75,7 @@ pub async fn target(
             })?;
 
     info!("Received keys for sender: {:?}", checkout.sender);
-    let data =
-        crate::encryption::decrypt_envelope::<Value>(&envelope, &checkout.receipt.encryption_key);
+    let data = crate::encryption::decrypt_envelope::<Value>(&envelope, &checkout.key);
 
     info!(
         "DATA RECEIVED FROM SENDER_CLIENT_ID={}: {:?}",

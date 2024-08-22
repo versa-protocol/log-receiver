@@ -37,9 +37,25 @@ pub struct ReceiptRecord {
 }
 
 #[derive(Deserialize)]
+pub struct TransactionHandles {
+    pub customer_email: Option<String>,
+    pub customer_email_domain: Option<String>,
+    pub customer_email_uhash: Option<String>,
+    pub card_last_four: Option<String>,
+    pub card_bin: Option<String>,
+    /// WARN: currently for testing purposes only — do not use
+    pub versa_client_ids: Option<Vec<String>>,
+}
+
+#[derive(Deserialize)]
 pub struct Checkout {
-    pub receipt: ReceiptRecord,
+    pub key: Vec<u8>,
+    pub receipt_id: String,
+    pub receipt_hash: String,
+    pub schema_version: String,
+    pub transaction_id: String,
     pub sender: Option<Org>,
+    pub handles: TransactionHandles,
 }
 
 #[derive(Deserialize, Serialize)]
