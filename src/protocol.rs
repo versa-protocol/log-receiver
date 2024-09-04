@@ -10,7 +10,7 @@ pub struct CheckoutRequest {
 #[derive(Deserialize)]
 pub struct Transaction {
     pub receipt_hash: String,
-    pub encryption_key: Vec<u8>,
+    pub encryption_key: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -33,7 +33,7 @@ pub struct Org {
 pub struct ReceiptRecord {
     pub schema_version: String,
     pub receipt_hash: String,
-    pub encryption_key: Vec<u8>,
+    pub encryption_key: String,
 }
 
 #[derive(Deserialize)]
@@ -49,7 +49,7 @@ pub struct TransactionHandles {
 
 #[derive(Deserialize)]
 pub struct Checkout {
-    pub key: Vec<u8>,
+    pub key: String,
     pub receipt_id: String,
     pub receipt_hash: String,
     pub schema_version: String,

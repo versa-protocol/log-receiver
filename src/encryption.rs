@@ -1,20 +1,21 @@
-use aes_siv::{
+use aes_gcm_siv::{
     aead::{Aead, KeyInit, Payload},
-    Aes256SivAead,
+    Aes256GcmSiv,
 };
+use base64::prelude::*;
 use serde::Deserialize;
 
 use crate::model::Envelope;
 
-pub fn decrypt_envelope<T>(envelope: &Envelope, key: &Vec<u8>) -> T
+pub fn decrypt_envelope<T>(envelope: Envelope, key: String) -> T
 where
     T: for<'a> Deserialize<'a>,
 {
-    let cipher = Aes256SivAead::new(key[..].into());
-    let decrypted = match cipher.decrypt(
-        envelope.nonce[..].into(),
-        Payload::from(&envelope.encrypted[..]),
-    ) {
+    let encrypted_data = BASE64_STANDARD.decode(envelope.encrypted).unwrap();
+    let nonce = BASE64_STANDARD.decode(envelope.nonce).unwrap();
+    let key = BASE64_STANDARD.decode(key).unwrap();
+    let cipher = Aes256GcmSiv::new(key[..].into());
+    let decrypted = match cipher.decrypt(nonce[..].into(), Payload::from(&encrypted_data[..])) {
         Ok(decrypted) => decrypted,
         Err(e) => panic!("Failed to decrypt envelope: {:?}", e),
     };
