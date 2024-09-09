@@ -1,3 +1,4 @@
+use base64::prelude::*;
 use hmac::Mac;
 use http::HeaderMap;
 use serde_json::Value;
@@ -13,8 +14,8 @@ async fn verify_with_secret(
     let body_bytes = axum::body::to_bytes(body, 512_000_000).await.unwrap();
     mac.update(body_bytes.as_ref());
     let code_bytes = mac.finalize().into_bytes();
-    let hexdigest = hex::encode(&code_bytes.to_vec());
-    (hexdigest == token, body_bytes)
+    let encoded = BASE64_STANDARD.encode(&code_bytes.to_vec());
+    (encoded == token, body_bytes)
 }
 
 pub async fn target(
