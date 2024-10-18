@@ -10,7 +10,6 @@ mod config;
 mod encryption;
 mod healthz;
 mod middleware;
-mod model;
 mod protocol;
 mod receiver;
 

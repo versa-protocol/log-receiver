@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use versa::protocol::Checkout;
 
-use crate::model::Envelope;
+use versa::protocol::Envelope;
 
 #[derive(Serialize)]
 pub struct CheckoutRequest {

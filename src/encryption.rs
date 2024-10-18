@@ -5,7 +5,7 @@ use aes_gcm_siv::{
 use base64::prelude::*;
 use serde::Deserialize;
 
-use crate::model::Envelope;
+use versa::protocol::Envelope;
 
 pub fn decrypt_envelope<T>(envelope: Envelope, key: String) -> T
 where
