@@ -2,8 +2,7 @@ use base64::prelude::*;
 use hmac::Mac;
 use http::HeaderMap;
 use serde_json::Value;
-
-use crate::protocol::ReceiverPayload;
+use versa::protocol::ReceiverPayload;
 
 async fn verify_with_secret(
     body: axum::body::Body,
