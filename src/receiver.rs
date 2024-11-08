@@ -1,26 +1,13 @@
-use base64::prelude::*;
-use hmac::Mac;
 use http::HeaderMap;
 use serde_json::Value;
-use versa::protocol::ReceiverPayload;
-
-async fn verify_with_secret(
-    body: axum::body::Body,
-    secret: String,
-    token: &str,
-) -> (bool, hyper::body::Bytes) {
-    let mut mac = hmac::Hmac::<sha1::Sha1>::new_from_slice(&secret.as_bytes()).unwrap();
-    let body_bytes = axum::body::to_bytes(body, 512_000_000).await.unwrap();
-    mac.update(body_bytes.as_ref());
-    let code_bytes = mac.finalize().into_bytes();
-    let encoded = BASE64_STANDARD.encode(&code_bytes.to_vec());
-    (encoded == token, body_bytes)
-}
+use versa::{client::VersaClient, client_receiver::VersaReceiver, protocol::ReceiverPayload};
 
 pub async fn target(
     headers: HeaderMap,
     raw_body: axum::body::Body,
 ) -> Result<http::StatusCode, (http::StatusCode, String)> {
+    let receiver_client_id = std::env::var("CLIENT_ID").expect("CLIENT_ID must be set");
+    let receiver_client_secret = std::env::var("CLIENT_SECRET").expect("CLIENT_SECRET must be set");
     let receiver_secret = std::env::var("RECEIVER_SECRET").expect("RECEIVER_SECRET must be set");
 
     let Some(request_signature) = headers.get("X-Request-Signature") else {
@@ -35,13 +22,22 @@ pub async fn target(
             "Malformed X-Request-Signature header".to_string(),
         ));
     };
-    let (verified, body_bytes) = verify_with_secret(raw_body, receiver_secret, request_token).await;
-    if !verified {
-        return Err((
-            http::StatusCode::UNAUTHORIZED,
-            "Failed to verify request signature".to_string(),
-        ));
-    }
+
+    let versa_client = VersaClient::new(receiver_client_id, receiver_client_secret)
+        .receiving_client(receiver_secret);
+
+    let body_bytes = versa_client
+        .verify_event(
+            axum::body::to_bytes(raw_body, 512_000_000).await.unwrap(),
+            request_token,
+        )
+        .map_err(|_| {
+            (
+                http::StatusCode::UNAUTHORIZED,
+                "Failed to verify request signature".to_string(),
+            )
+        })?;
+
     info!("Successfully verified hmac request signature");
     let body: ReceiverPayload = match serde_json::from_slice(&body_bytes) {
         Ok(val) => val,
@@ -61,21 +57,15 @@ pub async fn target(
 
     info!("Received envelope from sender={}", sender_client_id);
 
-    let receiver_client_id = std::env::var("CLIENT_ID").unwrap_or_default();
-    let receiver_client_secret = std::env::var("CLIENT_SECRET").unwrap_or_default();
-
-    let checkout =
-        crate::protocol::checkout_key(&receiver_client_id, &receiver_client_secret, receipt_id)
-            .await
-            .map_err(|_| {
-                (
-                    http::StatusCode::INTERNAL_SERVER_ERROR,
-                    "Failed to checkout key".to_string(),
-                )
-            })?;
+    let checkout = versa_client.checkout_key(receipt_id).await.map_err(|_| {
+        (
+            http::StatusCode::INTERNAL_SERVER_ERROR,
+            "Failed to checkout key".to_string(),
+        )
+    })?;
 
     info!("Received keys for sender: {:?}", checkout.sender);
-    let data = crate::encryption::decrypt_envelope::<Value>(envelope, checkout.key);
+    let data = versa_client.decrypt_envelope::<Value>(envelope, checkout.key);
 
     info!(
         "DATA RECEIVED FROM SENDER_CLIENT_ID={}: {:?}",

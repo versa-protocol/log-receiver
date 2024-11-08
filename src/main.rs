@@ -7,10 +7,8 @@ use tracing::Level;
 extern crate tracing;
 
 mod config;
-mod encryption;
 mod healthz;
 mod middleware;
-mod protocol;
 mod receiver;
 
 #[tokio::main]
