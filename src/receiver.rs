@@ -1,6 +1,10 @@
 use http::HeaderMap;
 use serde_json::Value;
-use versa::{client::VersaClient, client_receiver::VersaReceiver, protocol::ReceiverPayload};
+use versa::{
+    client::VersaClient,
+    client_receiver::VersaReceiver,
+    protocol::{ReceiverPayload, WebhookEvent},
+};
 
 pub async fn target(
     headers: HeaderMap,
@@ -39,7 +43,7 @@ pub async fn target(
         })?;
 
     info!("Successfully verified hmac request signature");
-    let body: ReceiverPayload = match serde_json::from_slice(&body_bytes) {
+    let body: WebhookEvent<ReceiverPayload> = match serde_json::from_slice(&body_bytes) {
         Ok(val) => val,
         Err(e) => {
             return Err((
@@ -49,11 +53,13 @@ pub async fn target(
         }
     };
 
+    let payload = body.data;
+
     let ReceiverPayload {
         sender_client_id,
         receipt_id,
         envelope,
-    } = body;
+    } = payload;
 
     info!("Received envelope from sender={}", sender_client_id);
 
