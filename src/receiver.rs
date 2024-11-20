@@ -28,6 +28,11 @@ pub async fn target(
     };
 
     let versa_client = VersaClient::new(receiver_client_id, receiver_client_secret)
+        .with_client_string(&format!(
+            "log-receiver/{}/{}",
+            env!("CARGO_PKG_VERSION").to_string(),
+            std::env::var("IMAGE_VERSION").unwrap_or("".into())
+        ))
         .receiving_client(receiver_secret);
 
     let body_bytes = versa_client

@@ -26,5 +26,6 @@ RUN apt-get install -y gnupg lsb-release wget
 # Copy executable to the readied runner image
 FROM runner as service
 COPY --from=builder /usr/local/cargo/bin/log-receiver /usr/local/bin/log-receiver
+ENV IMAGE_VERSION="$IMAGE_DIGEST"
 EXPOSE 8000
 CMD ["log-receiver"]
